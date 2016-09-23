@@ -361,3 +361,38 @@ rmvnorm2 <- function( n , Mu=rep(0,length(sigma)) , sigma=rep(1,length(Mu)) , Rh
     rmvnorm( n=n , mean=Mu , sigma=SIGMA , method=method )
 }
 
+dgumbel <- function(x, mu=0, beta=1, log=FALSE) {
+    std_x <- ( x - mu ) / beta
+    ll <- -log(beta) - std_x - exp(-std_x)
+    if( log==FALSE  ) ll <- exp(ll)
+    ll
+}
+
+rgumbel <- function(n, mu=0, beta=1) {
+    # mu + beta * ( -log( -log( runif(n) ) ) )
+    qgumbel(runif(n), mu, beta)
+}
+
+qgumbel <- function(p, mu=0, beta=1, lower.tail=TRUE, log.p=FALSE) {
+    if( log.p )
+        log_p <- p
+    else
+        log_p <- log(p)
+    if( lower.tail==FALSE )
+        log_p <- log_p - logit(exp(log_p)) # uses logit with no tricks, still not sure about stability...probably slower too (extra log in each step)
+        # log_p <- log( 1 - exp(log_p) ) #probably bad numerics
+    mu + beta * ( -log( -log_p ) )
+}
+
+pgumbel <- function(q, mu=0, beta=1, lower.tail=TRUE, log.p=FALSE) {
+    log_p <- -exp(-(q-mu)/beta)
+    p <- exp(log_p)
+    if( lower.tail==FALSE ) {
+        p <- 1 - p
+        if( log.p==TRUE ) {# not need to update if not returning
+            log_p <- log(p)
+            p <- log_p
+        }
+    }
+    p
+}

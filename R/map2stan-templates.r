@@ -997,6 +997,28 @@ dev <- dev + (-2)*(bernoulli_lpmf(0|PAR1) + binomial_lpmf(OUTCOME|PAR2,PAR3));",
             return(c(new_k[1],theta_txt));
         },
         vectorized = FALSE
+    ),
+    Gumbel = list(
+        name = "Gumbel",
+        R_name = "dgumbel",
+        stan_name = "gumbel",
+        stan_suffix = "_lpdf",
+        num_pars = 2,
+        par_names = c("mu", "beta"),# c("mu","sigma"),
+        par_bounds = c("","<lower=0>"),
+        par_types = c("real","real"),
+        out_type = "real",
+        par_map = function(k,e,...) {
+            # get constraints and add <lower=0> for beta vector
+            constr_list <- get( "constraints" , envir=e )
+            beta_name <- as.character( k[[2]] )
+            if ( is.null(constr_list[[beta_name]]) ) {
+                constr_list[[beta_name]] <- "lower=0"
+                assign( "constraints" , constr_list , envir=e )
+            }
+            return(k);
+        },
+        vectorized = TRUE
     )
 )
 
